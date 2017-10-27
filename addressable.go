@@ -11,11 +11,8 @@ const (
 
 // Methods
 const (
-	MethodGet    = "GET"
-	MethodPost   = "POST"
-	MethodPut    = "PUT"
-	MethodPatch  = "PATCH"
-	MethodDelete = "DELETE"
+	MethodGet  = "GET"
+	MethodPost = "POST"
 )
 
 // Addressable - address for reaching the service
