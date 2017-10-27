@@ -1,0 +1,107 @@
+Procedure to generate images "multiarch" (well, not multiarch but with binaries in both archichetures)
+
+Dockerfile.build.distro:
+		FROM golang:1.8-alpine3.6
+		WORKDIR /go/src/github.com/drasko/edgex-export
+		COPY . .
+		ARG ARCH
+		RUN if [[ "${ARCH}"X == "x86_64"X ]]; then cd cmd/distro && CGO_ENABLED=0 GOOS=linux go build -ldflags "-s" -a -installsuffix cgo -o exe;  \
+		else cd cmd/distro && GOARCH=arm64 CGO_ENABLED=0 GOOS=linux go build -ldflags "-s" -a -installsuffix cgo -o exe; fi
+
+		FROM scratch
+
+		COPY --from=0 /go/src/github.com/drasko/edgex-export/cmd/distro/exe /
+
+		ENTRYPOINT ["/exe"]
+
+
+Build both images with binaries compiled:
+=========================================
+docker build . -t golang_binary_arm64 --build-arg ARCH=arm64  -f Dockerfile.build.distro
+
+docker build . -t golang_binary_x86_64 --build-arg ARCH=x86_64  -f Dockerfile.build.distro
+
+Tag images:
+===========
+docker tag golang_binary_x86_64 chenchix/golang_binary_x86_64:latest
+
+docker tag golang_binary_arm64 chenchix/golang_binary_arm64:latest
+
+Push to your hub (be sure you are logged into docker  (docker login))
+=====================================================================
+
+docker push chenchix/golang_binary_x86_64:latest
+docker push chenchix/golang_binary_arm64:latest
+
+Now here is the trick to merge everything
+=========================================
+cd $GOPATH/src
+mkdir -p github.com/estesp
+cd github.com/estesp
+git clone github.com/estesp/manifest-tool
+export PATH=$PATH:$GOPATH/src/github.com/estesp/manifest-tool
+
+
+You'll need this script test-registry.sh
+
+	#!/bin/bash
+	_REGISTRY="${1}"
+
+	_IMAGELIST="chenchix/golang_binary_x86_64
+	chenchix/golang_binary_arm64"
+	VERSION="latest"
+
+	[ -z "${_REGISTRY}" ] && {
+		echo "Please provide a registry URL + namespace/repo name as the first parameter"
+		exit 1
+	}
+
+	echo "Warning: some commands will fail if you are not authenticated to ${_REGISTRY}"
+
+	echo ">> 1: Pulling required images from DockerHub"
+	for i in $_IMAGELIST; do
+		docker pull ${i}:$VERSION
+	done
+
+	echo ">> 2: Tagging and pushing images to registry ${_REGISTRY}"
+	for i in $_IMAGELIST; do
+		target="${i/\//_}"
+		[ "${target}" == "${i}" ] && {
+			# special case for no arch prefix on amd64 (x86_64 Linux) images  
+			target="amd64_${i}"
+		}
+		echo docker tag ${i}:$VERSION ${_REGISTRY}/${target}:$VERSION
+		docker tag ${i}:$VERSION ${_REGISTRY}/${target}:$VERSION
+		docker push ${_REGISTRY}/${target}:$VERSION
+	done
+
+	echo ">> 4: Attempt creating manifest list on registry ${_REGISTRY}"
+
+	sed s,__REGISTRY__,${_REGISTRY}, test-registry.yml >test-registry.yaml
+	manifest-tool --debug push from-spec test-registry.yaml
+
+and this template
+test-registry.yml
+
+	image: __REGISTRY__/golang_multiarch:latest
+	manifests:
+	  - 
+	    image: __REGISTRY__/golang_binary_x86_64:latest
+	    platform: 
+	      architecture: amd64
+	      os: linux
+	  -
+	    image: __REGISTRY__/golang_binary_arm64:latest
+	    platform: 
+	      architecture: arm64
+	      os: linux
+	      variant: armv8
+
+Run:
+====
+
+test-registry.sh chenchix
+
+And you can find a new repo in your docker hub, use it in x86 and arm64
+
+docker run chenchix/golang_multiarch
