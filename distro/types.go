@@ -19,7 +19,7 @@ type Sender interface {
 
 // Formater - Format interface
 type Formater interface {
-	Format( /* FIXME event*/ ) []byte
+	Format(event *export.Event) []byte
 }
 
 // Transformer - Transform interface

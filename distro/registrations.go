@@ -12,7 +12,9 @@ package distro
 // - Filtering by id and value
 // - Receive events from 0mq until a new message broker/rpc is chosen
 // - Implement json/xml/.... serializers
-// - Event buffer management per sender(do not block distro.Loop on full
+// - Senders should not connect at creation time, but when first event comes.
+//   - Reconnect after disconnect
+//   - Event buffer management per sender(do not block distro.Loop on full
 //   registration channel)
 
 import (
@@ -27,11 +29,11 @@ import (
 type dummyFormat struct {
 }
 
-func (dummy dummyFormat) Format( /*event*/ ) []byte {
+func (reg *RegistrationInfo) Format(event *export.Event) []byte {
 	return []byte("dummy")
 }
 
-var dummy dummyFormat
+var dummy Formater
 
 func (reg *RegistrationInfo) update(newReg export.Registration) bool {
 	reg.registration = newReg
@@ -103,7 +105,7 @@ func (reg RegistrationInfo) processEvent(event *export.Event) {
 
 	logger.Info("Event: ", zap.String("device", event.Device))
 
-	formated := reg.format.Format( /*event*/ )
+	formated := reg.format.Format(event)
 	compressed := formated
 	if reg.compression != nil {
 		compressed = reg.compression.Transform(formated)
