@@ -1,9 +1,3 @@
-//
-// Copyright (c) 2017 Cavium
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-
 package distro
 
 // TODO:
@@ -114,19 +108,20 @@ func (reg RegistrationInfo) processEvent( /*event*/ ) {
 	reg.sender.Send(encrypted)
 }
 
-func registrationLoop(reg RegistrationInfo) {
+func registrationLoop(registration RegistrationInfo) {
 	logger.Info("registration loop started")
+	reg := registration
 	for {
 		select {
 		case /*event :=*/ <-reg.chEvent:
 			reg.processEvent( /*event*/ )
 
-		case newReg := <-reg.chRegistration:
-			if newReg == nil {
+		case newResgistration := <-reg.chRegistration:
+			if newResgistration == nil {
 				logger.Info("Terminate registration goroutine")
 			} else {
 				// TODO implement updating the registration info.
-				logger.Info("Registration updated")
+				logger.Info("resgistration update")
 			}
 		}
 	}
@@ -146,7 +141,7 @@ func Loop(repo *mongo.MongoRepository, errChan chan error) {
 		}
 	}
 
-	logger.Info("Starting registration loop")
+	logger.Info("Starting resgistration loop")
 	for {
 		select {
 		case e := <-errChan:

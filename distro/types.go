@@ -1,12 +1,7 @@
-//
-// Copyright (c) 2017 Cavium
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-
 package distro
 
 import (
+	//"bytes"
 	"github.com/drasko/edgex-export"
 )
 
@@ -15,7 +10,7 @@ type Sender interface {
 }
 
 type Formater interface {
-	Format( /* FIXME event*/ ) []byte
+	Format( /*event*/ ) []byte
 }
 
 type Transformer interface {
@@ -30,7 +25,5 @@ type RegistrationInfo struct {
 	sender       Sender
 
 	chRegistration chan *RegistrationInfo
-
-	// TODO To be changed to event
-	chEvent chan bool
+	chEvent        chan bool // To be changed to event
 }

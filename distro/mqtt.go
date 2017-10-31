@@ -1,9 +1,3 @@
-//
-// Copyright (c) 2017 Cavium
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-
 package distro
 
 import (
@@ -15,12 +9,11 @@ import (
 )
 
 type mqttSender struct {
-	client MQTT.Client
-	topic  string
+	mqttClient MQTT.Client
+	topic      string
 }
 
 const clientID = "edgex"
-const topic = "EdgeX"
 
 func NewMqttSender(addr export.Addressable) Sender {
 	opts := MQTT.NewClientOptions()
@@ -32,12 +25,12 @@ func NewMqttSender(addr export.Addressable) Sender {
 	opts.SetUsername(addr.User)
 	opts.SetPassword(addr.Password)
 
-	sender := mqttSender{
-		client: MQTT.NewClient(opts),
-		topic:  addr.Topic,
-	}
+	var sender mqttSender
 
-	if token := sender.client.Connect(); token.Wait() && token.Error() != nil {
+	sender.mqttClient = MQTT.NewClient(opts)
+	sender.topic = addr.Topic
+
+	if token := sender.mqttClient.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
 	logger.Info("Sample Publisher Started")
@@ -46,7 +39,7 @@ func NewMqttSender(addr export.Addressable) Sender {
 }
 
 func (sender mqttSender) Send(data []byte) {
-	token := sender.client.Publish(sender.topic, 0, false, data)
+	token := sender.mqttClient.Publish(sender.topic, 0, false, data)
 	// FIXME: could be removed? set of tokens?
 	token.Wait()
 	logger.Debug("Sent data: ", zap.ByteString("data", data))
