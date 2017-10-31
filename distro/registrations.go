@@ -12,7 +12,9 @@ package distro
 // - Filtering by id and value
 // - Receive events from 0mq until a new message broker/rpc is chosen
 // - Implement json/xml/.... serializers
-// - Event buffer management per sender(do not block distro.Loop on full
+// - Senders should not connect at creation time, but when first event comes.
+//   - Reconnect after disconnect
+//   - Event buffer management per sender(do not block distro.Loop on full
 //   registration channel)
 
 import (

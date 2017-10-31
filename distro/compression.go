@@ -1,9 +1,3 @@
-//
-// Copyright (c) 2017 Cavium
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-
 package distro
 
 import (
