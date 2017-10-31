@@ -1,4 +1,4 @@
-Procedure to generate images "multiarch" (well, not multiarch but with binaries in both archichetures)
+ Procedure to generate images "multiarch" (well, not multiarch but with binaries in both archichetures)
 
 Dockerfile.build.distro:
 		FROM golang:1.8-alpine3.6
