@@ -30,6 +30,6 @@ type RegistrationInfo struct {
 	sender       Sender
 
 	chRegistration chan *RegistrationInfo
-	
-	chEvent chan bool export.Event
+
+	chEvent chan export.Event
 }
