@@ -29,11 +29,11 @@ import (
 type dummyFormat struct {
 }
 
-func (dummy dummyFormat) Format( /*event*/ ) []byte {
+func (reg *RegistrationInfo) Format(event *export.Event) []byte {
 	return []byte("dummy")
 }
 
-var dummy dummyFormat
+var dummy Formater
 
 func (reg *RegistrationInfo) update(newReg export.Registration) bool {
 	reg.registration = newReg
@@ -105,7 +105,7 @@ func (reg RegistrationInfo) processEvent(event *export.Event) {
 
 	logger.Info("Event: ", zap.String("device", event.Device))
 
-	formated := reg.format.Format( /*event*/ )
+	formated := reg.format.Format(event)
 	compressed := formated
 	if reg.compression != nil {
 		compressed = reg.compression.Transform(formated)

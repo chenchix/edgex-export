@@ -21,6 +21,5 @@ func getNextEvent() *export.Event {
 		return nil
 	}
 
-	//logger.Debug("Event", zap.)
 	return &event
 }
