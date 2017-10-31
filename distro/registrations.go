@@ -83,12 +83,12 @@ func (reg *RegistrationInfo) update(newReg export.Registration) bool {
 	}
 
 	reg.chRegistration = make(chan *RegistrationInfo)
-	reg.chEvent = make(chan export.Event)
+	reg.chEvent = make(chan *export.Event)
 
 	return true
 }
 
-func (reg RegistrationInfo) processEvent(event export.Event) {
+func (reg RegistrationInfo) processEvent(event *export.Event) {
 	// Valid Event Filter, needed?
 
 	// TODO Device filtering
@@ -157,7 +157,7 @@ func Loop(repo *mongo.MongoRepository, errChan chan error) {
 
 		case <-time.After(time.Second):
 			// Simulate receiving events
-			event := *getNextEvent()
+			event := getNextEvent()
 			logger.Info("Event: ", zap.Int("length", len(registrations)))
 
 			for r := range registrations {
