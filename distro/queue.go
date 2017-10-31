@@ -7,7 +7,6 @@ package distro
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/drasko/edgex-export"
 	"go.uber.org/zap"
@@ -21,6 +20,7 @@ func getNextEvent() *export.Event {
 		logger.Error("Failed to query add registration", zap.Error(err))
 		return nil
 	}
-	fmt.Println(event)
+
+	//logger.Debug("Event", zap.)
 	return &event
 }
