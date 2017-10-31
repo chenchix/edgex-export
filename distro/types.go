@@ -15,7 +15,7 @@ type Sender interface {
 }
 
 type Formater interface {
-	Format( /* FIXME event*/ ) []byte
+	Format(event *export.Event) []byte
 }
 
 type Transformer interface {
