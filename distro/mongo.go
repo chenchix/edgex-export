@@ -22,6 +22,7 @@ func getRegistrations(repo *mongo.MongoRepository) []export.Registration {
 	c := s.DB(mongo.DbName).C(mongo.CollectionName)
 
 	results := []export.Registration{}
+
 	err := c.Find(nil).All(&results)
 	if err != nil {
 		logger.Error("Failed to query", zap.Error(err))
