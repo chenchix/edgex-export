@@ -37,5 +37,5 @@ type RegistrationInfo struct {
 
 	chRegistration chan *RegistrationInfo
 
-	chEvent chan export.Event
+	chEvent chan *export.Event
 }
