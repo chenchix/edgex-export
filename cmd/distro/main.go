@@ -48,6 +48,8 @@ type config struct {
 	MongoSocketTimeout  int
 }
 
+var logger *zap.Logger
+
 func main() {
 	logger, _ = zap.NewProduction()
 	defer logger.Sync()
