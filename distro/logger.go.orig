@@ -1,10 +1,15 @@
+<<<<<<< HEAD
 //
-// Copyright (c) 2017 Mainflux
+// Copyright (c) 2017
+// Cavium
+// Mainflux
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-package client
+=======
+>>>>>>> Revert "Merge branch 'goonathome_dontuse' into development"
+package distro
 
 import "go.uber.org/zap"
 
