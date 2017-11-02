@@ -20,7 +20,7 @@ func getRegByID(w http.ResponseWriter, r *http.Request) {
 
 	s := repo.Session.Copy()
 	defer s.Close()
-	c := s.DB(mongo.DbName).C(mongo.CollectionName)
+	c := s.DB(mongo.DBName).C(mongo.CollectionName)
 
 	reg := export.Registration{}
 	if err := c.Find(bson.M{"id": id}).One(&reg); err != nil {
@@ -47,23 +47,23 @@ func getRegList(w http.ResponseWriter, r *http.Request) {
 
 	t := bone.GetValue(r, "type")
 
-   var l string
+	var l string
 
 	switch t {
-		case "algorithms":
-			l = `["None","Aes"]`
-		case "compressions":
-			l = `["None","Gzip","Zip"]`
-		case "formats":
-			l = `["JSON","XML","Serialized","IotCoreJSON","AzureJSON","CSV"]`
-		case "destinations":
-			l = `["DestMQTT", "TeDestZMQller", "DestIotCoreMQTT,
+	case "algorithms":
+		l = `["None","Aes"]`
+	case "compressions":
+		l = `["None","Gzip","Zip"]`
+	case "formats":
+		l = `["JSON","XML","Serialized","IotCoreJSON","AzureJSON","CSV"]`
+	case "destinations":
+		l = `["DestMQTT", "TeDestZMQller", "DestIotCoreMQTT,
 			"DestAzureMQTT", "DestRest"]`
-		default :
-			logger.Error("Unknown type: " + t);
-			w.WriteHeader(http.StatusBadRequest)
-			io.WriteString(w, "Unknown type: " + t)
-			return
+	default:
+		logger.Error("Unknown type: " + t)
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, "Unknown type: "+t)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -75,7 +75,7 @@ func getAllReg(w http.ResponseWriter, r *http.Request) {
 
 	s := repo.Session.Copy()
 	defer s.Close()
-	c := s.DB(mongo.DbName).C(mongo.CollectionName)
+	c := s.DB(mongo.DBName).C(mongo.CollectionName)
 
 	reg := []export.Registration{}
 	if err := c.Find(nil).All(&reg); err != nil {
@@ -85,7 +85,7 @@ func getAllReg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := json.Marshal(reg);
+	res, err := json.Marshal(reg)
 	if err != nil {
 		logger.Error("Failed to query all registrations", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -104,7 +104,7 @@ func getRegByName(w http.ResponseWriter, r *http.Request) {
 
 	s := repo.Session.Copy()
 	defer s.Close()
-	c := s.DB(mongo.DbName).C(mongo.CollectionName)
+	c := s.DB(mongo.DBName).C(mongo.CollectionName)
 
 	reg := export.Registration{}
 	if err := c.Find(bson.M{"name": name}).One(&reg); err != nil {
@@ -145,16 +145,16 @@ func addReg(w http.ResponseWriter, r *http.Request) {
 
 	s := repo.Session.Copy()
 	defer s.Close()
-	c := s.DB(mongo.DbName).C(mongo.CollectionName)
+	c := s.DB(mongo.DBName).C(mongo.CollectionName)
 
-	count, err := c.Find(bson.M{"name": reg.Name}).Count();
-	if  err != nil {
+	count, err := c.Find(bson.M{"name": reg.Name}).Count()
+	if err != nil {
 		logger.Error("Failed to query add registration", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		io.WriteString(w, err.Error())
 		return
 	}
-	if  count != 0 {
+	if count != 0 {
 		logger.Error("Username already taken: " + reg.Name)
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -188,7 +188,7 @@ func updateReg(w http.ResponseWriter, r *http.Request) {
 
 	s := repo.Session.Copy()
 	defer s.Close()
-	c := s.DB(mongo.DbName).C(mongo.CollectionName)
+	c := s.DB(mongo.DBName).C(mongo.CollectionName)
 
 	name := body["name"]
 	query := bson.M{"name": name}
@@ -209,7 +209,7 @@ func delRegByID(w http.ResponseWriter, r *http.Request) {
 
 	s := repo.Session.Copy()
 	defer s.Close()
-	c := s.DB(mongo.DbName).C(mongo.CollectionName)
+	c := s.DB(mongo.DBName).C(mongo.CollectionName)
 
 	if err := c.Remove(bson.M{"id": id}); err != nil {
 		logger.Error("Failed to query by id", zap.Error(err))
@@ -226,7 +226,7 @@ func delRegByName(w http.ResponseWriter, r *http.Request) {
 
 	s := repo.Session.Copy()
 	defer s.Close()
-	c := s.DB(mongo.DbName).C(mongo.CollectionName)
+	c := s.DB(mongo.DBName).C(mongo.CollectionName)
 
 	if err := c.Remove(bson.M{"name": name}); err != nil {
 		logger.Error("Failed to query by name", zap.Error(err))

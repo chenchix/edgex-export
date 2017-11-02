@@ -1,3 +1,11 @@
+//
+// Copyright (c) 2017
+// Cavium
+// Mainflux
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
 package distro
 
 import (
@@ -9,12 +17,14 @@ import (
 )
 
 type mqttSender struct {
-	mqttClient MQTT.Client
-	topic      string
+	client MQTT.Client
+	topic  string
 }
 
 const clientID = "edgex"
+const topic = "EdgeX"
 
+// NewMqttSender - create new mqtt sender
 func NewMqttSender(addr export.Addressable) Sender {
 	opts := MQTT.NewClientOptions()
 	// CHN: Should be added protocol from Addressable instead of include it the address param.
@@ -24,23 +34,31 @@ func NewMqttSender(addr export.Addressable) Sender {
 	opts.SetClientID(clientID)
 	opts.SetUsername(addr.User)
 	opts.SetPassword(addr.Password)
+	opts.SetAutoReconnect(false)
 
-	var sender mqttSender
-
-	sender.mqttClient = MQTT.NewClient(opts)
-	sender.topic = addr.Topic
-
-	if token := sender.mqttClient.Connect(); token.Wait() && token.Error() != nil {
-		panic(token.Error())
+	sender := mqttSender{
+		client: MQTT.NewClient(opts),
+		topic:  addr.Topic,
 	}
-	logger.Info("Sample Publisher Started")
 
 	return sender
 }
 
 func (sender mqttSender) Send(data []byte) {
-	token := sender.mqttClient.Publish(sender.topic, 0, false, data)
+	if !sender.client.IsConnected() {
+		logger.Info("Connecting to mqtt server")
+		if token := sender.client.Connect(); token.Wait() && token.Error() != nil {
+			logger.Warn("Could not connect to mqtt server, drop event")
+			return
+		}
+	}
+
+	token := sender.client.Publish(sender.topic, 0, false, data)
 	// FIXME: could be removed? set of tokens?
 	token.Wait()
-	logger.Debug("Sent data: ", zap.ByteString("data", data))
+	if token.Error() != nil {
+		logger.Warn("mqtt error: ", zap.Error(token.Error()))
+	} else {
+		logger.Debug("Sent data: ", zap.ByteString("data", data))
+	}
 }

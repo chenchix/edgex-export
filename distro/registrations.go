@@ -1,5 +1,7 @@
 //
-// Copyright (c) 2017 Cavium
+// Copyright (c) 2017
+// Cavium
+// Mainflux
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -10,9 +12,7 @@ package distro
 // - Filtering by id and value
 // - Receive events from 0mq until a new message broker/rpc is chosen
 // - Implement json/xml/.... serializers
-// - Senders should not connect at creation time, but when first event comes.
-//   - Reconnect after disconnect
-//   - Event buffer management per sender(do not block distro.Loop on full
+// - Event buffer management per sender(do not block distro.Loop on full
 //   registration channel)
 
 import (
@@ -79,7 +79,7 @@ func (reg *RegistrationInfo) update(newReg export.Registration) bool {
 	case export.DestAzureMQTT:
 		// TODO reg.sender = distro.NewAzureSender("TODO URL")
 	case export.DestRest:
-		reg.sender = NewHttpSender(newReg.Addressable)
+		reg.sender = NewHTTPSender(newReg.Addressable)
 	default:
 		logger.Info("Destination not supported: ", zap.String("destination", newReg.Destination))
 	}
@@ -136,7 +136,8 @@ func registrationLoop(registration RegistrationInfo) {
 	}
 }
 
-func Loop(repo *mongo.MongoRepository, errChan chan error) {
+// Loop - registration loop
+func Loop(repo *mongo.Repository, errChan chan error) {
 
 	var registrations []RegistrationInfo
 

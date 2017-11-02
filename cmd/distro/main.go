@@ -1,10 +1,10 @@
-/**
- * Copyright (c) 2017 Mainflux
- *
- * Mainflux server is licensed under an Apache license, version 2.0.
- * All rights not explicitly granted in the Apache license, version 2.0 are reserved.
- * See the included LICENSE file for more details.
- */
+//
+// Copyright (c) 2017
+// Cavium
+// Mainflux
+//
+// SPDX-License-Identifier: Apache-2.0
+//
 
 package main
 
@@ -49,7 +49,7 @@ type config struct {
 }
 
 func main() {
-	logger, _ := zap.NewProduction()
+	logger, _ = zap.NewProduction()
 	defer logger.Sync()
 
 	distro.InitLogger(logger)
@@ -64,7 +64,7 @@ func main() {
 	}
 	defer ms.Close()
 
-	repo := mongo.NewMongoRepository(ms)
+	repo := mongo.NewRepository(ms)
 	distro.InitMongoRepository(repo)
 
 	errs := make(chan error, 2)
@@ -110,11 +110,6 @@ func env(key, fallback string) string {
 }
 
 func connectToMongo(cfg *config) (*mgo.Session, error) {
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-
-	distro.InitLogger(logger)
-
 	mongoDBDialInfo := &mgo.DialInfo{
 		Addrs:    []string{cfg.MongoURL + ":" + strconv.Itoa(cfg.MongoPort)},
 		Timeout:  time.Duration(cfg.MongoConnectTimeout) * time.Millisecond,
